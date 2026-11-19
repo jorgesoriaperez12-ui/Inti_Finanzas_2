@@ -32,8 +32,8 @@ create table if not exists public.movimientos (
   tipo_comprobante     text check (tipo_comprobante in ('01','02','03','04')),
   serie                text check (char_length(serie) <= 10),
   numero               text check (char_length(numero) <= 20),
-  base_imponible       numeric(14,2) check (base_imponible is null or base_imponible >= 0),
-  igv_monto            numeric(14,2) check (igv_monto is null or igv_monto >= 0),
+  base_imponible       numeric(14,2),
+  igv_monto            numeric(14,2),
   otros_tributos       numeric(14,2) not null default 0 check (otros_tributos >= 0),
   importe_total        numeric(14,2) not null check (importe_total > 0 and importe_total < 100000000),
   sujeto_a_detraccion  boolean not null default false,
@@ -42,6 +42,11 @@ create table if not exists public.movimientos (
   monto_neto_pagar     numeric(14,2) not null default 0,
   creado               timestamptz not null default now()
 );
+-- Detalle de líneas del comprobante: [{q: cantidad, n: producto, pu: precio unitario, t: total de la línea}]
+alter table public.movimientos add column if not exists items jsonb;
+alter table public.movimientos drop constraint if exists mov_items_check;
+alter table public.movimientos add constraint mov_items_check
+  check (items is null or (jsonb_typeof(items) = 'array' and jsonb_array_length(items) <= 100 and octet_length(items::text) < 30000));
 -- Velocidad: casi todas las consultas filtran por usuario y fecha
 create index if not exists mov_user_fecha on public.movimientos (user_id, fecha_emision desc);
 
@@ -114,9 +119,6 @@ begin
   if new.tipo_doc_identidad = 'DNI' and new.numero_doc_identidad is not null and length(new.numero_doc_identidad) <> 8 then
     raise exception 'El DNI debe tener 8 dígitos'; end if;
 
-  if new.otros_tributos > new.importe_total then
-    raise exception 'Otros tributos no pueden superar el importe total'; end if;
-
   -- Desglose de IGV por comprobante (si no lo envían)
   if new.base_imponible is null and new.igv_monto is null then
     if new.tipo_comprobante in ('01','04') then
@@ -139,13 +141,10 @@ begin
   if tg_op = 'INSERT' then
     select coalesce(nullif(valor,'')::int, 0) into lim from public.parametros where clave = 'limite_free_mensual';
     if coalesce(lim,0) > 0 then
-      select case when plan = 'pro' and pro_hasta is not null and pro_hasta < now() then 'free' else plan end
-        into pl from public.perfiles where user_id = new.user_id;
+      select plan into pl from public.perfiles where user_id = new.user_id;
       if coalesce(pl,'free') = 'free' then
         select count(*) into n from public.movimientos
-         where user_id = new.user_id
-           and fecha_emision >= date_trunc('month', coalesce(new.fecha_emision, now()))
-           and fecha_emision <  date_trunc('month', coalesce(new.fecha_emision, now())) + interval '1 month';
+         where user_id = new.user_id and fecha_emision >= date_trunc('month', now());
         if n >= lim then
           raise exception 'Llegaste al límite del plan gratuito (% movimientos al mes). Pasa al plan Pro.', lim; end if;
       end if;
