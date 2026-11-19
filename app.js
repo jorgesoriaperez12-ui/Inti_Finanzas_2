@@ -1,14 +1,14 @@
 
 const CAT={C:'Comida',V:'Gasto Vehicular',H:'Hogar y compras',E:'Educación',R:'Refrigerios',O:'Otros gastos',S:'Salud',A:'Vivienda y alquiler',W:'Servicios (luz, agua, internet)',T:'Entretenimiento',P:'Ropa y calzado',I:'Sueldo'};
-const $=i=>document.getElementById(i),esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const $=i=>document.getElementById(i),esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const fm=n=>Number(n||0).toLocaleString('es-PE',{minimumFractionDigits:2,maximumFractionDigits:2});
 const MES=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'],DIA=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 const PAL=['#e4e4e7','#bcbcc4','#a1a1aa','#85858e','#71717a','#5a5a63','#46464d','#34343a'],GRN=['#d4d4d8','#a1a1aa','#71717a','#52525b','#3f3f46'];
 let ALL=[],ROWS=[],PREV=[],FR=[],PK='',SEL='all',Q='',N=14,CH={},SORT={k:'d',v:-1},S={budget:0,goal:20,form:'',neg:'',reg:'NRUS',dig:'0',uit:5500,igvinc:1,coef:0,amaz:0,amIgv:1,amRen:10,meta:0};
 
-if(typeof Chart!=='undefined'){Chart.defaults.font.family="'JetBrains Mono',monospace";Chart.defaults.font.size=10;Chart.defaults.color='#71717a';Chart.defaults.borderColor='#1f1f23'}
+Chart.defaults.font.family="'JetBrains Mono',monospace";Chart.defaults.font.size=10;Chart.defaults.color='#71717a';Chart.defaults.borderColor='#1f1f23';
 const TT={backgroundColor:'#000',borderColor:'#2e2e33',borderWidth:1,padding:10};
-const mk=(id,c)=>{if(CH[id])CH[id].destroy();if(typeof Chart==='undefined'||!$(id))return;c.options=Object.assign({responsive:true,maintainAspectRatio:false,animation:{duration:500}},c.options);CH[id]=new Chart($(id),c)};
+const mk=(id,c)=>{if(CH[id])CH[id].destroy();c.options=Object.assign({responsive:true,maintainAspectRatio:false,animation:{duration:500}},c.options);CH[id]=new Chart($(id),c)};
 const key=d=>String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();
 const sum=(a,t)=>a.reduce((s,x)=>x.t===t?s+x.m:s,0);
 const grp=(a,t,f)=>{const o={};a.forEach(x=>{if(x.t===t){const k=f(x);o[k]=(o[k]||0)+x.m}});return o};
@@ -16,8 +16,7 @@ const sorted=o=>Object.entries(o).sort((a,b)=>b[1]-a[1]);
 const p2=n=>String(n).padStart(2,'0'),dkey=d=>d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate()),dsh=d=>p2(d.getDate())+'/'+p2(d.getMonth()+1);
 function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('on'),2800)}
 function dias(a){const m=new Map();[...a].sort((x,y)=>x.d-y.d).forEach(x=>{const k=dkey(x.d);if(!m.has(k))m.set(k,{d:x.d,g:0,i:0});m.get(k)[x.t==='Gasto'?'g':'i']+=x.m});return[...m.values()]}
-const num=v=>{if(v===undefined||v===null||v==='')return null;let s=String(v).replace(/S\/\.?\s*/gi,'').trim();if(s.includes(',')&&s.includes('.'))s=s.lastIndexOf(',')>s.lastIndexOf('.')?s.replace(/\./g,'').replace(',','.'):s.replace(/,/g,'');else if(s.includes(','))s=/,\d{3}(?:,|$)/.test(s)&&s.split(',').length>2?s.replace(/,/g,''):s.replace(',','.');const n=parseFloat(s);return isNaN(n)?null:n};
-function parseFecha(v){if(v instanceof Date)return v;const s=String(v==null?'':v).trim();if(!s)return new Date(NaN);let m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);if(m)return new Date(+m[1],+m[2]-1,+m[3],12,0,0);m=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?$/);if(m)return new Date(+m[3],+m[2]-1,+m[1],m[4]?+m[4]:12,m[5]?+m[5]:0,m[6]?+m[6]:0);return new Date(s)}
+const num=v=>{if(v===undefined||v===null||v==='')return null;const n=parseFloat(String(v).replace(/S\/\.?\s*/g,'').replace(',','.'));return isNaN(n)?null:n};
 const bool=v=>/^(1|true|si|sí|s|x|yes|verdadero)$/i.test(String(v==null?'':v).trim());
 const tcode=v=>{const q=String(v==null?'':v).trim().toLowerCase();if(!q)return'';if(/^0?1$|factura/.test(q))return'01';if(/^0?3$|boleta/.test(q))return'03';if(/^0?2$|rxh|honorarios/.test(q))return'02';if(/^0?4$|liq/.test(q))return'04';return q};
 // Cada fila acepta los encabezados nuevos (snake_case) y los de tu hoja actual
@@ -32,10 +31,10 @@ function normRow(o){
  const sd=bool(g(['sujeto_a_detraccion'])),td=num(g(['tasa_detraccion']));let md=num(g(['monto_detraccion'])),mn=num(g(['monto_neto_pagar']));
  if(md==null&&sd&&td)md=Math.round(tot*td)/100;
  if(mn==null)mn=md?tot-md:tot;
- return{id:o.id,d:parseFecha(g(['fecha_emision','Fecha y hora','Fecha'])),t,c:String(g(['descripcion','Descripción o concepto','Concepto'])||'').trim(),k:g(['categoria','Categoría (tipo de gasto)','Categoría'])||'Otros',
-  m:mn,tot,otros,tc,se:g(['serie']),nu:g(['numero']),rs:String(g(['razon_social'])||''),di:g(['tipo_doc_identidad']),nd:g(['numero_doc_identidad']),pc:g(['categoria_pcge']),base,igv,md:md||0,sd,td:td||0}}
+ return{id:o.id,d:new Date(g(['fecha_emision','Fecha y hora','Fecha'])),t,c:String(g(['descripcion','Descripción o concepto','Concepto'])||'').trim(),k:g(['categoria','Categoría (tipo de gasto)','Categoría'])||'Otros',
+  m:mn,tot,otros,tc,se:g(['serie']),nu:g(['numero']),rs:String(g(['razon_social'])||''),di:g(['tipo_doc_identidad']),nd:g(['numero_doc_identidad']),pc:g(['categoria_pcge']),base,igv,md:md||0,sd,td:td||0,items:Array.isArray(o.items)?o.items:null}}
 // x.m = monto_neto_pagar (flujo de caja: Resumen y Deudas) · x.tot = importe_total (base de impuestos)
-const norm=a=>a.map(normRow).filter(x=>!isNaN(x.d)&&x.d.getFullYear()>2000&&x.tot>0&&x.t).sort((a,b)=>b.d-a.d);
+const norm=a=>a.map(normRow).filter(x=>x.d.getFullYear()>2000&&x.tot>0&&x.t).sort((a,b)=>b.d-a.d);
 const demo=()=>{let z=11;const r=()=>(z=(z*9301+49297)%233280)/233280,o=[],h=new Date();h.setHours(12,0,0,0);
  const P=[['Menú del día',12,'Venta de productos',.9,6],['Pollo a la brasa',34,'Venta de productos',.5,4],['Ceviche',28,'Venta de productos',.45,3],['Gaseosa',4,'Venta de productos',.8,8],['Postre',8,'Venta de productos',.4,4],['Delivery',5,'Prestación de servicios',.5,5]];
  const iso=d=>d.toISOString(),r2=v=>Math.round(v*100)/100,CV={razon_social:'CLIENTES VARIOS',tipo_doc_identidad:'DNI',numero_doc_identidad:'00000000',tipo_comprobante:'03'};
@@ -111,14 +110,14 @@ function movs(){
  const c=$('fc').value;
  FR=ROWS.filter(x=>(!t||x.t===t)&&(!c||x.k===c)&&(!q||(x.c+' '+x.k).toLowerCase().includes(q)));
  const k=SORT.k;FR.sort((a,b)=>(k==='m'||k==='d'?a[k]-b[k]:String(a[k]).localeCompare(String(b[k])))*SORT.v);
- $('tb').innerHTML=FR.slice(0,300).map(x=>{const i=x.t==='Ingreso';return`<tr><td>${dsh(x.d)}</td><td>${esc(x.c||'—')}${x.tc?' <span class="lb">'+esc(x.tc)+'</span>':''}</td><td>${esc(x.k)}</td><td class="n ${i?'g-t':'r-t'}">${i?'+':'−'} ${fm(x.m)}</td><td class="n">${x.id?`<button class="bt" style="padding:4px 8px" data-del-mov="${esc(x.id)}" aria-label="Eliminar">✕</button>`:''}</td></tr>`}).join('')||'<tr><td colspan="5" class="vac">// sin resultados</td></tr>';
+ $('tb').innerHTML=FR.slice(0,300).map(x=>{const i=x.t==='Ingreso';return`<tr><td>${dsh(x.d)}</td><td>${esc(x.c||'—')}${x.tc?' <span class="lb">'+x.tc+'</span>':''}</td><td>${esc(x.k)}</td><td class="n ${i?'g-t':'r-t'}">${i?'+':'−'} ${fm(x.m)}</td><td class="n">${x.id?`<button class="bt" style="padding:4px 8px" onclick="borrarMov('${x.id}')" aria-label="Eliminar">✕</button>`:''}</td></tr>`}).join('')||'<tr><td colspan="5" class="vac">// sin resultados</td></tr>';
  $('ft2').innerHTML=`${FR.length} movimientos · <span class="g-t">+ ${fm(sum(FR,'Ingreso'))}</span> · <span class="r-t">− ${fm(sum(FR,'Gasto'))}</span>`;
 }
 function ordenar(k){SORT=SORT.k===k?{k,v:-SORT.v}:{k,v:k==='c'||k==='k'?1:-1};movs()}
 function buscar(v){Q=v;if(!$('v-movs').classList.contains('on'))ver('movs');movs()}
 function alertas(){
  const G=sum(ROWS,'Gasto'),I=sum(ROWS,'Ingreso'),a=[],mm=SEL!=='all';
- if(G>I)a.push(['r','Gastas más de lo que ingresas: déficit de S/ '+fm(G-I)+'.']);
+ if(I>0&&G>I)a.push(['r','Gastas más de lo que ingresas: déficit de S/ '+fm(G-I)+'.']);
  if(S.budget>0&&mm){const p=G/S.budget*100;if(p>=100)a.push(['r','Superaste tu presupuesto por S/ '+fm(G-S.budget)+'.']);else if(p>=80)a.push(['y','Ya usaste '+p.toFixed(0)+'% de tu presupuesto.'])}
  const c=sorted(grp(ROWS,'Gasto',x=>x.k))[0];if(c&&G&&c[1]/G>=.4)a.push(['y',esc(c[0])+' concentra el '+(c[1]/G*100).toFixed(0)+'% de tus gastos.']);
  if(I>0&&(I-G)/I*100<S.goal)a.push(['y','Tu ahorro está por debajo de la meta del '+S.goal+'%.']);
@@ -173,10 +172,10 @@ function deudas(){
  const ST={pagada:['PAGADA','g-t'],vencida:['VENCIDA','r-t'],proxima:['PRÓXIMA','y-t'],pendiente:['PENDIENTE','gy']};
  const tx=x=>x.hit.length?'registrada '+dsh(x.hit[0].d):x.man?'marcada a mano':x.dias<0?'venció hace '+(-x.dias)+' d':x.dias===0?'vence hoy':'en '+x.dias+' d';
  const bs='style="padding:6px 9px"';
- $('dtb').innerHTML=it.map(x=>`<tr><td>${esc(x.d.n)}<div class="lb">${x.d.rec==='sunat'?'Impuesto SUNAT':x.d.rec==='unico'?'Pago único':'Mensual'}</div></td><td>${dsh(x.due)}<div class="lb">${tx(x)}</div></td><td class="n r-t">S/ ${fm(x.d.m)}</td><td class="${ST[x.st][1]}">${ST[x.st][0]}</td><td class="n">${x.hit.length?'':`<button class="bt" ${bs} data-marcar="${esc(x.d.id)}" data-y="${y}" data-m="${m}">${x.man?'Desmarcar':'Marcar'}</button> `}${x.d.rec==='sunat'?'':`<button class="bt" ${bs} data-del-deuda="${esc(x.d.id)}" aria-label="Eliminar">✕</button>`}</td></tr>`).join('')||'<tr><td colspan="5" class="vac">// agrega tu primera deuda arriba</td></tr>';
+ $('dtb').innerHTML=it.map(x=>`<tr><td>${esc(x.d.n)}<div class="lb">${x.d.rec==='sunat'?'Impuesto SUNAT':x.d.rec==='unico'?'Pago único':'Mensual'}</div></td><td>${dsh(x.due)}<div class="lb">${tx(x)}</div></td><td class="n r-t">S/ ${fm(x.d.m)}</td><td class="${ST[x.st][1]}">${ST[x.st][0]}</td><td class="n">${x.hit.length?'':`<button class="bt" ${bs} onclick="marcar('${x.d.id}',${y},${m})">${x.man?'Desmarcar':'Marcar'}</button> `}${x.d.rec==='sunat'?'':`<button class="bt" ${bs} onclick="borrarDeuda('${x.d.id}')" aria-label="Eliminar">✕</button>`}</td></tr>`).join('')||'<tr><td colspan="5" class="vac">// agrega tu primera deuda arriba</td></tr>';
  const fu=DB.l.filter(d=>d.rec==='unico'&&new Date(...String(d.d).split('-').map((v,i)=>i===1?v-1:+v))>=fin).sort((a,b)=>a.d<b.d?-1:1);
  $('dfu').hidden=!fu.length;
- $('dfl').innerHTML=fu.map(d=>`<div class="rw rx"><div><div class="tx">${esc(d.n)}</div><div class="lb">${esc(d.d.split('-').reverse().join('/'))}</div></div><span class="r-t">S/ ${fm(d.m)} <button class="bt" ${bs} data-del-deuda="${esc(d.id)}" aria-label="Eliminar">✕</button></span></div>`).join('');
+ $('dfl').innerHTML=fu.map(d=>`<div class="rw rx"><div><div class="tx">${esc(d.n)}</div><div class="lb">${d.d.split('-').reverse().join('/')}</div></div><span class="r-t">S/ ${fm(d.m)} <button class="bt" ${bs} onclick="borrarDeuda('${d.id}')" aria-label="Eliminar">✕</button></span></div>`).join('');
 }
 function tipoDeuda(){const u=$('dt').value==='unico';$('dd').hidden=u;$('df').hidden=!u}
 async function addDeuda(){
@@ -205,6 +204,7 @@ let ND=14,PM='v';
 function dayRows(rows){const m=new Map();rows.forEach(x=>{const k=dkey(x.d);if(!m.has(k))m.set(k,{d:new Date(x.d.getFullYear(),x.d.getMonth(),x.d.getDate()),v:0,g:0,n:0});const o=m.get(k);if(x.t==='Ingreso'){o.v+=x.m;o.n++;if(esCons(x))o.c=1}else o.g+=x.m});return[...m.values()].sort((a,b)=>b.d-a.d)}
 function prods(rows){const m=new Map();
  rows.forEach(x=>{if(x.t!=='Ingreso'||esCons(x)||/^(otros ingresos|intereses)/i.test(x.k))return;
+  if(x.items&&x.items.length){x.items.forEach(it=>{const n=String(it.n||x.k).trim(),k=nz(n)||'sin nombre',o=m.get(k)||{n,q:0,v:0,c:x.k};o.q+=(+it.q||1);o.v+=(+it.t||0);m.set(k,o)});return}
   let c=(x.c||x.k).trim(),q=1;const a=c.match(/^(\d+(?:[.,]\d+)?)\s*[xX*]\s*(.+)$/),b=c.match(/^(.+?)\s+[xX*]\s*(\d+)$/);
   if(a){q=parseFloat(a[1].replace(',','.'));c=a[2]}else if(b){c=b[1];q=+b[2]}
   const k=nz(c)||'sin nombre',o=m.get(k)||{n:c,q:0,v:0,c:x.k};o.q+=q;o.v+=x.m;m.set(k,o)});
@@ -243,9 +243,9 @@ document.querySelectorAll('#rng3 button').forEach(b=>b.onclick=()=>{PM=b.dataset
 const CRON=['2|16,17,18,19,20,23,24','3|16,17,18,19,20,23,24','4|17,20,21,22,23,24,27','5|18,19,20,21,22,25,26','6|15,16,17,18,19,22,23','7|15,16,17,20,21,22,24','8|18,19,20,21,24,25,26','9|15,16,17,18,21,22,23','10|16,19,20,21,22,23,26','11|16,17,18,19,20,23,24','12|17,18,21,22,23,24,28','1|18,19,20,21,22,25,26'];
 const RG={NRUS:'Nuevo RUS',RER:'Régimen Especial (RER)',RMT:'MYPE Tributario (RMT)',NONE:''};
 function vencSunat(py,pm){
- const d=Math.min(9,Math.max(0,parseInt(S.dig)||0)),gi=[0,1,2,2,3,3,4,4,5,5][d];
+ const gi=[0,1,2,2,3,3,4,4,5,5][+S.dig||0];
  const CR=CRONS[py]||(py===2026?CRON:null);
- if(Array.isArray(CR)&&CR[pm]){const[a,b]=String(CR[pm]).split('|'),mes=+a;return{f:new Date(mes===1?py+1:py,mes-1,+b.split(',')[gi]),aprox:false}}
+ if(CR){const[a,b]=CR[pm].split('|'),mes=+a;return{f:new Date(mes===1?py+1:py,mes-1,+b.split(',')[gi]),aprox:false}}
  let f=new Date(py,pm+1,16);while(f.getDay()===0||f.getDay()===6)f.setDate(f.getDate()+1);
  for(let i=0;i<gi;i++){do f.setDate(f.getDate()+1);while(f.getDay()===0||f.getDay()===6)}
  return{f,aprox:true}}
@@ -283,7 +283,7 @@ function irAnualRMT(y,m){
 function cierreDia(){
  const hoy=dkey(new Date()),ds=ALL.filter(x=>x.t==='Ingreso'&&dkey(x.d)<=hoy).map(x=>dkey(x.d)).sort().pop();
  if(!ds)return{g:0,txt:'Sin ventas registradas'};
- const R=ALL.filter(x=>dkey(x.d)===ds),cons=R.filter(esCons),ing=cons.length?sum(cons,'Ingreso')+sum(R.filter(x=>x.tc==='01'),'Ingreso'):sum(R,'Ingreso'),
+ const R=ALL.filter(x=>dkey(x.d)===ds),cons=R.filter(esCons),ing=cons.length?sum(cons,'Ingreso'):sum(R,'Ingreso'),
   gas=R.filter(x=>x.t==='Gasto'&&!NODED.includes(x.k)).reduce((a,x)=>a+x.m,0),g=ing-gas;
  return{g,ing,gas,txt:(ds===hoy?'Hoy':ds.split('-').reverse().slice(0,2).join('/'))+' · margen '+(ing>0?(g/ing*100).toFixed(0)+'%':'—')+(cons.length?' · boleta consolidada':' · ventas registradas')}}
 function impuestos(){
@@ -322,65 +322,27 @@ function impuestos(){
 
 function togAm(){$('amx').hidden=!$('cfgA').checked}
 function regUI(){$('fila-coef').style.display=$('cfgR').value==='RMT'?'':'none'}
-function togAl(e){if(e&&e.stopPropagation)e.stopPropagation();$('al').hidden=!$('al').hidden}
-document.addEventListener('click',e=>{
- if(!e.target||!e.target.closest)return;
- if(!e.target.closest('.rel'))$('al').hidden=true;
- const bm=e.target.closest('[data-del-mov]');if(bm){borrarMov(bm.dataset.delMov);return}
- const mk=e.target.closest('[data-marcar]');if(mk){marcar(mk.dataset.marcar,+mk.dataset.y,+mk.dataset.m);return}
- const bd=e.target.closest('[data-del-deuda]');if(bd){borrarDeuda(bd.dataset.delDeuda)}
-});
+function togAl(e){e.stopPropagation();$('al').hidden=!$('al').hidden}
+document.addEventListener('click',e=>{if(!e.target.closest('.rel'))$('al').hidden=true});
 function ver(v){document.querySelectorAll('.v').forEach(s=>s.classList.toggle('on',s.id==='v-'+v));document.querySelectorAll('.nb').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
  if(v==='ajustes'){llenarCfg();$('cuenta').textContent=USER?USER.email:'';$('plan').textContent=PLAN.toUpperCase()}
  window.scrollTo(0,0);Object.values(CH).forEach(c=>c.resize())}
-function guardar(){const g=i=>$(i).value.trim(),uf=g('cfgF');
- if(uf&&!/^https?:\/\//i.test(uf)){toast('La URL del formulario debe iniciar con https://');return}
- S.budget=Math.max(0,parseFloat(g('cfgB'))||0);S.goal=Math.min(100,Math.max(0,parseFloat(g('cfgG'))||0));S.form=uf;S.neg=g('cfgN');S.reg=g('cfgR');S.dig=g('cfgD');
- S.uit=Math.max(100,parseFloat(g('cfgU'))||5500);S.igvinc=g('cfgI')==='1'?1:0;S.coef=Math.min(0.5,Math.max(0,parseFloat(g('cfgC'))||0));S.amaz=$('cfgA').checked?1:0;S.amIgv=$('cfgAI').checked?1:0;S.amRen=parseInt(g('cfgAR'))||0;S.meta=Math.max(0,parseFloat(g('cfgM'))||0);
+function guardar(){const g=i=>$(i).value.trim();
+ S.budget=parseFloat(g('cfgB'))||0;S.goal=Math.min(100,Math.max(0,parseFloat(g('cfgG'))||0));S.form=g('cfgF');S.neg=g('cfgN');S.reg=g('cfgR');S.dig=g('cfgD');
+ S.uit=parseFloat(g('cfgU'))||5500;S.igvinc=g('cfgI')==='1'?1:0;S.coef=Math.max(0,parseFloat(g('cfgC'))||0);S.amaz=$('cfgA').checked?1:0;S.amIgv=$('cfgAI').checked?1:0;S.amRen=parseInt(g('cfgAR'))||0;S.meta=parseFloat(g('cfgM'))||0;
  S.onb=1;guardarCfg();toast('AJUSTES GUARDADOS');pintar()}
 function llenarCfg(){$('cfgB').value=S.budget||'';$('cfgG').value=S.goal;$('cfgF').value=S.form;$('cfgN').value=S.neg;$('cfgR').value=S.reg;$('cfgD').value=S.dig;$('cfgU').value=S.uit;$('cfgI').value=S.igvinc?'1':'0';$('cfgC').value=S.coef||'';$('cfgA').checked=!!S.amaz;$('cfgAI').checked=!!S.amIgv;$('cfgAR').value=String(S.amRen);togAm();regUI();$('cfgM').value=S.meta||''}
 function resetCfg(){S={budget:0,goal:20,form:'',neg:'',reg:'NRUS',dig:'0',uit:5500,igvinc:1,coef:0,amaz:0,amIgv:1,amRen:10,meta:0};guardarCfg();ver('ajustes');toast('AJUSTES RESTABLECIDOS');pintar()}
 function abrirForm(){abrirModal()}
 function exportar(a,n){if(!a.length){toast('NO HAY DATOS PARA EXPORTAR');return}
- const q=s=>{const v=String(s==null?'':s);return'"'+(/^[=+\-@\t\r]/.test(v)?"'"+v:v).replace(/"/g,'""')+'"'},L=['Fecha,Tipo,Categoría,Concepto,Comprobante,Serie-Número,Razón social,Importe total,IGV,Neto a pagar'].concat([...a].sort((x,y)=>y.d-x.d).map(x=>[dkey(x.d),x.t,q(x.k),q(x.c),x.tc||'',q((x.se||'')+(x.nu?'-'+x.nu:'')),q(x.rs),x.tot.toFixed(2),x.igv!=null?x.igv.toFixed(2):'',x.m.toFixed(2)].join(',')));
- const u=URL.createObjectURL(new Blob(['\ufeff'+L.join('\n')],{type:'text/csv;charset=utf-8'})),l=document.createElement('a');l.href=u;l.download=n+'_'+dkey(new Date())+'.csv';document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL&&URL.revokeObjectURL(u),1000);toast('CSV DESCARGADO')}
+ const q=s=>'"'+String(s).replace(/"/g,'""')+'"',L=['Fecha,Tipo,Categoría,Concepto,Comprobante,Serie-Número,Razón social,Importe total,IGV,Neto a pagar'].concat([...a].sort((x,y)=>y.d-x.d).map(x=>[dkey(x.d),x.t,q(x.k),q(x.c),x.tc||'',q((x.se||'')+(x.nu?'-'+x.nu:'')),q(x.rs),x.tot.toFixed(2),x.igv!=null?x.igv.toFixed(2):'',x.m.toFixed(2)].join(',')));
+ const l=document.createElement('a');l.href=URL.createObjectURL(new Blob(['\ufeff'+L.join('\n')],{type:'text/csv;charset=utf-8'}));l.download=n+'_'+dkey(new Date())+'.csv';document.body.appendChild(l);l.click();l.remove();toast('CSV DESCARGADO')}
 document.querySelectorAll('#rng button').forEach(b=>b.onclick=()=>{N=+b.dataset.n;document.querySelectorAll('#rng button').forEach(x=>x.classList.toggle('on',x===b));resumen()});
-document.querySelectorAll('.nb[data-v]').forEach(b=>b.onclick=()=>ver(b.dataset.v));
-document.querySelectorAll('th[data-ord]').forEach(th=>th.onclick=()=>ordenar(th.dataset.ord));
-$('per').onchange=function(){SEL=this.value;pintar()};
-$('q').oninput=function(){buscar(this.value)};
-$('btnAl').onclick=e=>togAl(e);
-$('btnRef').onclick=()=>cargar();
-$('btnNew').onclick=()=>abrirModal();
-$('btnEmpNew').onclick=()=>abrirModal();
-$('btnDemo').onclick=()=>verEjemplo();
-$('actNew').onclick=()=>abrirForm();
-$('actCsv').onclick=()=>exportar(ROWS,'periodo');
-$('actRef').onclick=()=>cargar();
-$('actPrt').onclick=()=>window.print();
-$('btnTpl').onclick=()=>plantilla();
-$('btnImp').onclick=()=>$('csvf').click();
-$('btnExp').onclick=()=>exportar(FR,'movimientos');
-$('ft').onchange=()=>movs();
-$('fc').onchange=()=>movs();
-$('dt').onchange=()=>tipoDeuda();
-$('btnAddD').onclick=()=>addDeuda();
-$('cfgR').onchange=()=>regUI();
-$('btnSaveCfg').onclick=()=>guardar();
-$('btnResCfg').onclick=()=>resetCfg();
-$('cfgA').onchange=()=>togAm();
-$('btnPro').onclick=()=>mejorarPlan();
-$('btnExpDat').onclick=()=>exportarDatos();
-$('btnOut').onclick=()=>salir();
-$('btnDelAcc').onclick=()=>eliminarCuenta();
-$('btnCloseM').onclick=()=>cerrarModal();
-$('mbtn').onclick=()=>guardarMov();
 
 /* ===== CUENTAS, DATOS EN LÍNEA Y SEGURIDAD (Supabase) ===== */
 const CFG=window.CFG||{};
-const sbUrl=String(CFG.SUPABASE_URL||'').trim().replace(/\/(?:rest|auth)\/v1\/?$/i,'').replace(/\/+$/,'');
-const sbOK=!!(sbUrl&&CFG.SUPABASE_ANON_KEY&&!/TU-PROYECTO|TU_CLAVE/.test(sbUrl+CFG.SUPABASE_ANON_KEY)&&window.supabase);
-const sb=sbOK?window.supabase.createClient(sbUrl,CFG.SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}):null;
+const sbOK=!!(CFG.SUPABASE_URL&&CFG.SUPABASE_ANON_KEY&&!/TU-PROYECTO|TU_CLAVE/.test(CFG.SUPABASE_URL+CFG.SUPABASE_ANON_KEY)&&window.supabase);
+const sb=sbOK?window.supabase.createClient(CFG.SUPABASE_URL,CFG.SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}):null;
 let USER=null,PLAN='free',MODO='login',FALLOS=0,LOCK=0,MT='Ingreso';
 const CAT_G=['Mercadería e insumos','Alquiler del local','Sueldos y personal','Servicios (luz, agua, internet)','Transporte y delivery','Publicidad y marketing','Impuestos y SUNAT','Mantenimiento y equipos','Préstamos y deudas','Otros gastos'];
 const CAT_I=['Venta de productos','Prestación de servicios','Otros ingresos'];
@@ -435,9 +397,10 @@ async function cargarTodo(){
   R.forEach(r=>{if(r.error)throw r.error});
   const cfg=R[0].data&&R[0].data.config?R[0].data.config:{};Object.assign(S,cfg);
   DB={l:R[1].data.map(d=>({id:d.id,n:d.nombre,m:+d.monto,rec:d.tipo,d:d.tipo==='mensual'?d.dia:d.fecha})),p:{}};R[2].data.forEach(x=>DB.p[x.clave]=1);
-  const pf=R[3].data;PLAN=pf&&pf.plan==='pro'&&(!pf.pro_hasta||new Date(pf.pro_hasta)>new Date())?'pro':'free';
+  PLAN=R[3].data?R[3].data.plan:'free';
   R[4].data.forEach(p=>{CRONS[p.anio]=p.cronograma;if(p.anio===new Date().getFullYear()&&!cfg.uit)S.uit=+p.uit});
   await cargarMovs();
+  $('st').textContent='Datos en vivo';$('st').style.color='#a1a1aa';
  }catch(e){$('st').textContent='Sin conexión';toast('No se pudieron cargar tus datos: '+(e.message||e))}
 }
 async function cargarMovs(){
@@ -446,33 +409,48 @@ async function cargarMovs(){
  for(;;){const{data,error}=await sb.from('movimientos').select('*').gte('fecha_emision',d0.toISOString()).order('fecha_emision',{ascending:false}).range(from,from+999);
   if(error)throw error;rows=rows.concat(data);if(data.length<1000||from>=20000)break;from+=1000}
  const ms=await sb.rpc('resumen_mensual',{meses:24});MENS=ms.error?[]:ms.data;
- ALL=norm(rows);periodos();pintar();$('st').textContent='Datos en vivo';$('st').style.color='#a1a1aa'}
+ ALL=norm(rows);periodos();pintar()}
 async function guardarCfg(){if(!USER)return;const{error}=await sb.from('ajustes').upsert({user_id:USER.id,config:S,actualizado:new Date().toISOString()});if(error)toast('No se pudo guardar tus ajustes: '+error.message)}
-function verEjemplo(){MENS=[];ALL=norm(demo());periodos();pintar();$('st').textContent='Modo ejemplo · no se guarda';$('st').style.color='#ffc14d'}
+function verEjemplo(){ALL=norm(demo());periodos();pintar();$('st').textContent='Modo ejemplo · no se guarda';$('st').style.color='#ffc14d'}
 
 // ---------- Registrar movimientos ----------
+let ITEMS=[{q:1,n:'',pu:''}];
+const itT=x=>Math.round((parseFloat(x.q)||0)*(parseFloat(x.pu)||0)*100)/100;
+function pintarItems(){
+ const ph=MT==='Gasto'?'Compra (ej. pollo, gas, bolsas)':'Producto o servicio';
+ $('itl').innerHTML=ITEMS.map((x,i)=>`<div class="itm"><input class="in" placeholder="${ph}" maxlength="60" value="${esc(x.n)}" oninput="itemSet(${i},'n',this.value)" aria-label="Producto o servicio">
+<button class="bt" type="button" style="padding:6px 9px" onclick="itemDel(${i})" aria-label="Quitar línea"${ITEMS.length<2?' disabled':''}>✕</button>
+<input type="number" min="0" step="any" inputmode="decimal" placeholder="Cant." value="${esc(x.q)}" oninput="itemSet(${i},'q',this.value)" aria-label="Cantidad">
+<input type="number" min="0" step="0.01" inputmode="decimal" placeholder="P. unit. S/" value="${esc(x.pu)}" oninput="itemSet(${i},'pu',this.value)" aria-label="Precio unitario">
+<div class="itt" id="it${i}">S/ ${fm(itT(x))}</div></div>`).join('');itTot()}
+function itTot(){$('mtot').textContent='S/ '+fm(ITEMS.reduce((a,x)=>a+itT(x),0))}
+function itemSet(i,k,v){if(!ITEMS[i])return;ITEMS[i][k]=v;if(k!=='n'){const e=$('it'+i);if(e)e.textContent='S/ '+fm(itT(ITEMS[i]))}itTot()}
+function itemAdd(){if(ITEMS.length>=30){toast('Máximo 30 líneas por comprobante');return}ITEMS.push({q:1,n:'',pu:''});pintarItems();const n=document.querySelectorAll('#itl .in');if(n.length)n[n.length-1].focus()}
+function itemDel(i){if(ITEMS.length<2)return;ITEMS.splice(i,1);pintarItems()}
 function mTipo(t){MT=t;document.querySelectorAll('#mtipo button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
- $('mk').innerHTML=(t==='Gasto'?CAT_G:CAT_I).map(c=>`<option>${esc(c)}</option>`).join('');$('mqf').style.display=t==='Ingreso'?'':'none';$('mdl').textContent=t==='Ingreso'?'Producto / servicio':'Detalle'}
+ $('mk').innerHTML=(t==='Gasto'?CAT_G:CAT_I).map(c=>`<option>${esc(c)}</option>`).join('');
+ $('itlbl').textContent=t==='Gasto'?'Compras o gastos del día':'Productos o servicios vendidos';pintarItems()}
 document.querySelectorAll('#mtipo button').forEach(b=>b.onclick=()=>mTipo(b.dataset.t));
-function abrirModal(){if(!USER){toast('Inicia sesión para registrar');return}mTipo('Ingreso');$('mf').value=dkey(new Date());$('merr').textContent='';$('modal').hidden=false;$('mm').focus()}
+function abrirModal(){if(!USER){toast('Inicia sesión para registrar');return}ITEMS=[{q:1,n:'',pu:''}];mTipo('Ingreso');$('mf').value=dkey(new Date());$('merr').textContent='';$('modal').hidden=false;const n=document.querySelectorAll('#itl .in');if(n.length)n[0].focus()}
 function cerrarModal(){$('modal').hidden=true}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')cerrarModal()});
 async function guardarMov(){
- const monto=parseFloat($('mm').value),e=m=>{$('merr').textContent=m};
- if(!(monto>0&&monto<1e8)){e('Escribe un monto válido (menor a 100,000,000)');return}
- let c=$('mc').value.trim();const q=Math.max(1,parseInt($('mq').value)||1),tc=$('mtc').value,nd=$('mnd').value.replace(/\D/g,''),sn=$('msn').value.trim().toUpperCase().split('-').map(s=>s.trim());
- if(MT==='Ingreso'&&q>1)c=q+' x '+(c||$('mk').value);
- c=c.slice(0,120);
+ const e=m=>{$('merr').textContent=m};
+ const items=ITEMS.map(x=>({q:parseFloat(x.q)||0,pu:parseFloat(x.pu)||0,n:String(x.n||'').trim()})).filter(x=>x.q>0&&x.pu>0)
+  .map(x=>({q:Math.round(x.q*1000)/1000,n:(x.n||$('mk').value).slice(0,60),pu:Math.round(x.pu*100)/100,t:Math.round(x.q*x.pu*100)/100}));
+ if(!items.length){e('Agrega al menos una línea con cantidad y precio');return}
+ const monto=Math.round(items.reduce((a,x)=>a+x.t,0)*100)/100;
+ if(monto>=1e8){e('El total es demasiado alto');return}
+ const c=items.map(x=>(x.q!==1?x.q+' x ':'')+x.n).join(', ').slice(0,120);
+ const tc=$('mtc').value,nd=$('mnd').value.replace(/\D/g,''),sn=$('msn').value.trim().toUpperCase().split('-');
  if(S.reg==='NRUS'&&MT==='Ingreso'&&tc==='01')toast('NRUS: no puedes emitir facturas. Se guardará y verás la alerta en la campana.');
  const f=$('mf').value?new Date($('mf').value+'T12:00:00'):new Date(),sd=$('msd').checked;
- if(isNaN(f)){e('Elige una fecha válida');return}
- const td=sd?Math.min(100,Math.max(0,parseFloat($('mtd').value)||0)):0;
- const row={fecha_emision:f.toISOString(),tipo_movimiento:MT,descripcion:c,categoria:$('mk').value,categoria_pcge:PCGE[$('mk').value]||null,importe_total:Math.round(monto*100)/100,
-  tipo_comprobante:tc||null,serie:sn[0]?sn[0].slice(0,10):null,numero:sn.slice(1).join('-').slice(0,20)||null,tipo_doc_identidad:nd?$('mdi').value:null,numero_doc_identidad:nd||null,razon_social:$('mrs').value.trim().slice(0,120)||null,
-  sujeto_a_detraccion:sd,tasa_detraccion:td};
+ const row={fecha_emision:f.toISOString(),tipo_movimiento:MT,descripcion:c,categoria:$('mk').value,categoria_pcge:PCGE[$('mk').value]||null,importe_total:monto,items,
+  tipo_comprobante:tc||null,serie:sn[0]||null,numero:sn.slice(1).join('-')||null,tipo_doc_identidad:nd?$('mdi').value:null,numero_doc_identidad:nd||null,razon_social:$('mrs').value.trim()||null,
+  sujeto_a_detraccion:sd,tasa_detraccion:sd?(parseFloat($('mtd').value)||0):0};
  $('mbtn').disabled=true;const{error}=await sb.from('movimientos').insert(row);$('mbtn').disabled=false;
  if(error){e(error.message);return}
- ['mm','mc','msn','mnd','mrs'].forEach(i=>$(i).value='');$('mq').value=1;$('mtc').value='';$('msd').checked=false;cerrarModal();toast('Registro guardado');await cargarMovs()}
+ ['msn','mnd','mrs'].forEach(i=>$(i).value='');$('mtc').value='';$('msd').checked=false;ITEMS=[{q:1,n:'',pu:''}];pintarItems();cerrarModal();toast('Registro guardado');await cargarMovs()}
 async function borrarMov(id){if(!confirm('¿Eliminar este movimiento?'))return;const{error}=await sb.from('movimientos').delete().eq('id',id);if(error){toast(error.message);return}toast('Movimiento eliminado');await cargarMovs()}
 
 // ---------- Importar CSV (acepta tus columnas actuales de Google Sheets) ----------
@@ -500,17 +478,16 @@ async function importarCSV(file){
  toast('Importación completa: '+rows.length+' registros');await cargarMovs()}
 $('csvf').onchange=e=>{if(e.target.files[0])importarCSV(e.target.files[0]);e.target.value=''};
 function plantilla(){const t='fecha_emision,tipo_movimiento,descripcion,categoria,importe_total,tipo_comprobante,serie,numero,tipo_doc_identidad,numero_doc_identidad,razon_social,sujeto_a_detraccion,tasa_detraccion\n2026-11-02,Ingreso,Menú del día,Venta de productos,12.00,03,B001,45,DNI,00000000,CLIENTES VARIOS,NO,0\n2026-11-03,Gasto,Compra de insumos,Mercadería e insumos,118.00,01,F001,9876,RUC,20601234567,DISTRIBUIDORA SELVA SAC,NO,0\n';
- const u=URL.createObjectURL(new Blob(['\ufeff'+t],{type:'text/csv;charset=utf-8'})),a=document.createElement('a');a.href=u;a.download='plantilla_importacion.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL&&URL.revokeObjectURL(u),1000)}
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+t],{type:'text/csv;charset=utf-8'}));a.download='plantilla_importacion.csv';document.body.appendChild(a);a.click();a.remove()}
 
 // ---------- Tus datos, tu plan ----------
-function mejorarPlan(){if(CFG.PAGO_URL&&/^https?:\/\//i.test(CFG.PAGO_URL))window.open(CFG.PAGO_URL+(CFG.PAGO_URL.includes('?')?'&':'?')+'ref='+encodeURIComponent(USER?USER.id:''),'_blank','noopener');else toast('El pago del plan Pro estará disponible pronto')}
+function mejorarPlan(){if(CFG.PAGO_URL)window.open(CFG.PAGO_URL+(CFG.PAGO_URL.includes('?')?'&':'?')+'ref='+encodeURIComponent(USER?USER.id:''),'_blank','noopener');else toast('El pago del plan Pro estará disponible pronto')}
 async function exportarDatos(){
- if(!USER){toast('Inicia sesión');return}
  toast('Preparando tu archivo…');let mov=[],from=0;
  for(;;){const{data,error}=await sb.from('movimientos').select('*').order('fecha_emision').range(from,from+999);if(error){toast(error.message);return}mov=mov.concat(data);if(data.length<1000)break;from+=1000}
- const[d,a,dm]=await Promise.all([sb.from('deudas').select('*'),sb.from('ajustes').select('config').maybeSingle(),sb.from('deuda_marcas').select('clave')]);
- const b=new Blob([JSON.stringify({exportado:new Date().toISOString(),correo:USER.email,ajustes:a.data?a.data.config:{},deudas:d.data||[],deuda_marcas:dm.data||[],movimientos:mov},null,1)],{type:'application/json'});
- const u=URL.createObjectURL(b),l=document.createElement('a');l.href=u;l.download='mis-datos-inti-'+dkey(new Date())+'.json';document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL&&URL.revokeObjectURL(u),1000)}
+ const[d,a]=await Promise.all([sb.from('deudas').select('*'),sb.from('ajustes').select('config').maybeSingle()]);
+ const b=new Blob([JSON.stringify({exportado:new Date().toISOString(),correo:USER.email,ajustes:a.data?a.data.config:{},deudas:d.data||[],movimientos:mov},null,1)],{type:'application/json'});
+ const l=document.createElement('a');l.href=URL.createObjectURL(b);l.download='mis-datos-inti-'+dkey(new Date())+'.json';document.body.appendChild(l);l.click();l.remove()}
 async function eliminarCuenta(){
  if(prompt('Esto borra tu cuenta y TODOS tus datos para siempre.\nEscribe ELIMINAR para confirmar:')!=='ELIMINAR')return;
  const{error}=await sb.rpc('eliminar_mi_cuenta');if(error){toast(error.message);return}
