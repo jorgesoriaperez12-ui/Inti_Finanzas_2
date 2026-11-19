@@ -8,7 +8,7 @@
 <link rel="icon" href="favicon.svg">
 <title>SYS.PANEL</title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
 :root{--bg:#000;--p:#0a0a0a;--l:#1f1f23;--l2:#2e2e33;--t:#fff;--d:#a1a1aa;--m:#52525b;--g:#10b981;--r:#ff4d4d;--y:#ffc14d;--f:'JetBrains Mono',ui-monospace,Menlo,monospace;color-scheme:dark;padding-top:env(safe-area-inset-top,0)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -70,33 +70,37 @@ td{padding:10px 8px;border-bottom:1px solid var(--l)}td.n,th.n{text-align:right}
 .lk{background:none;border:0;color:var(--g);font:inherit;font-size:12px;text-decoration:underline;cursor:pointer;padding:0}
 details{margin:6px 0}summary{cursor:pointer;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--m);padding:8px 0}
 .card a,#empty a{color:var(--g)}
+.fm .itm{display:grid;grid-template-columns:72px 1fr 96px;gap:8px;padding:10px 0;border-bottom:1px solid var(--l)}
+.fm .itm .in{grid-column:1/3}.fm .itm input{margin-bottom:0;min-width:0}
+.fm .itm .itt{text-align:right;align-self:center;color:var(--t);font-size:13px}
+#modal .fm select{margin-bottom:14px}
 </style>
 </head>
 <body>
 <nav class="side" aria-label="Secciones"><b></b>
-<button class="nb on" data-v="resumen"><i>▦</i>Resumen</button>
-<button class="nb" data-v="ventas"><i>◫</i>Ventas</button>
-<button class="nb" data-v="analisis"><i>◔</i>Análisis</button>
-<button class="nb" data-v="impuestos"><i>%</i>Impuestos</button>
-<button class="nb" data-v="deudas"><i>◷</i>Deudas</button>
-<button class="nb" data-v="movs"><i>≡</i>Registros</button>
-<button class="nb" data-v="ajustes"><i>⚙</i>Ajustes</button>
+<button class="nb on" data-v="resumen" onclick="ver('resumen')"><i>▦</i>Resumen</button>
+<button class="nb" data-v="ventas" onclick="ver('ventas')"><i>◫</i>Ventas</button>
+<button class="nb" data-v="analisis" onclick="ver('analisis')"><i>◔</i>Análisis</button>
+<button class="nb" data-v="impuestos" onclick="ver('impuestos')"><i>%</i>Impuestos</button>
+<button class="nb" data-v="deudas" onclick="ver('deudas')"><i>◷</i>Deudas</button>
+<button class="nb" data-v="movs" onclick="ver('movs')"><i>≡</i>Registros</button>
+<button class="nb" data-v="ajustes" onclick="ver('ajustes')"><i>⚙</i>Ajustes</button>
 </nav>
 <main>
 <header>
  <div><div class="lb" id="st">● …</div><div class="ttl" id="ttl">SYS.PANEL</div></div>
  <div class="hr">
-  <select id="per" aria-label="Periodo"><option value="all">Todo el periodo</option></select>
-  <input id="q" type="search" placeholder="buscar movimiento…" aria-label="Buscar" style="width:170px">
-  <span class="rel"><button class="bt" id="btnAl" aria-label="Alertas">◉ <span id="nbad">0</span></button><div id="al" class="pop" hidden></div></span>
-  <button class="bt" id="btnRef" aria-label="Actualizar">⟳</button>
-  <button class="bt pr" id="btnNew">+ Nuevo</button>
+  <select id="per" aria-label="Periodo" onchange="SEL=this.value;pintar()"><option value="all">Todo el periodo</option></select>
+  <input id="q" type="search" placeholder="buscar movimiento…" aria-label="Buscar" oninput="buscar(this.value)" style="width:170px">
+  <span class="rel"><button class="bt" onclick="togAl(event)" aria-label="Alertas">◉ <span id="nbad">0</span></button><div id="al" class="pop" hidden></div></span>
+  <button class="bt" onclick="cargar()" aria-label="Actualizar">⟳</button>
+  <button class="bt pr" onclick="abrirModal()">+ Nuevo</button>
   <span class="lb" id="usr" style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
  </div>
 </header>
 
 <section id="v-resumen" class="v on">
- <div class="pn" id="empty" hidden style="margin-bottom:14px"><div class="lb">Empieza aquí</div><div style="margin:10px 0 14px;line-height:1.8">Aún no tienes registros. Toca <b>+ Nuevo</b> para anotar tu primera venta o gasto, o importa tu historial desde un archivo CSV en la sección Registros.</div><div class="hr"><button class="bt pr" id="btnEmpNew">+ Nuevo registro</button><button class="bt" id="btnDemo">Ver con datos de ejemplo</button></div></div>
+ <div class="pn" id="empty" hidden style="margin-bottom:14px"><div class="lb">Empieza aquí</div><div style="margin:10px 0 14px;line-height:1.8">Aún no tienes registros. Toca <b>+ Nuevo</b> para anotar tu primera venta o gasto, o importa tu historial desde un archivo CSV en la sección Registros.</div><div class="hr"><button class="bt pr" onclick="abrirModal()">+ Nuevo registro</button><button class="bt" onclick="verEjemplo()">Ver con datos de ejemplo</button></div></div>
  <div class="g c4" id="hoy"></div>
  <div class="g c4" id="kp"></div>
  <div class="g c2">
@@ -114,10 +118,10 @@ details{margin:6px 0}summary{cursor:pointer;font-size:10px;letter-spacing:2px;te
   <div class="pn"><div class="lb">Top gastos</div><div style="margin-top:16px" id="top"></div></div>
   <div class="pn"><div class="lb">Transacciones recientes</div><div style="margin-top:8px" id="rec"></div></div>
   <div class="pn"><div class="lb">Acciones rápidas</div><div style="margin-top:6px">
-   <button class="act" id="actNew"><span>Nuevo registro<small>Abrir el formulario</small></span><b>→</b></button>
-   <button class="act" id="actCsv"><span>Exportar CSV<small>Periodo seleccionado</small></span><b>↓</b></button>
-   <button class="act" id="actRef"><span>Actualizar datos<small>Volver a leer la hoja</small></span><b>⟳</b></button>
-   <button class="act" id="actPrt"><span>Imprimir reporte<small>Guardar como PDF</small></span><b>⎙</b></button></div></div>
+   <button class="act" onclick="abrirForm()"><span>Nuevo registro<small>Abrir el formulario</small></span><b>→</b></button>
+   <button class="act" onclick="exportar(ROWS,'periodo')"><span>Exportar CSV<small>Periodo seleccionado</small></span><b>↓</b></button>
+   <button class="act" onclick="cargar()"><span>Actualizar datos<small>Volver a leer la hoja</small></span><b>⟳</b></button>
+   <button class="act" onclick="window.print()"><span>Imprimir reporte<small>Guardar como PDF</small></span><b>⎙</b></button></div></div>
  </div>
 </section>
 
@@ -165,9 +169,9 @@ details{margin:6px 0}summary{cursor:pointer;font-size:10px;letter-spacing:2px;te
 
 <section id="v-movs" class="v">
  <div class="pn">
-  <div class="rw"><div class="lb">Movimientos del periodo</div><div class="hr"><button class="bt" id="btnTpl">Plantilla</button><button class="bt" id="btnImp">↑ Importar</button><input type="file" id="csvf" accept=".csv,text/csv" hidden><button class="bt" id="btnExp">↓ CSV</button></div></div>
-  <div class="fl"><select id="ft"><option value="">Todos los tipos</option><option value="Ingreso">Ventas</option><option value="Gasto">Gastos</option></select><select id="fc"><option value="">Todas las categorías</option></select></div>
-  <div class="sc"><table><thead><tr><th data-ord="d">Fecha</th><th data-ord="c">Concepto</th><th data-ord="k">Categoría</th><th class="n" data-ord="m">Monto</th><th></th></tr></thead><tbody id="tb"></tbody></table></div>
+  <div class="rw"><div class="lb">Movimientos del periodo</div><div class="hr"><button class="bt" onclick="plantilla()">Plantilla</button><button class="bt" onclick="$('csvf').click()">↑ Importar</button><input type="file" id="csvf" accept=".csv,text/csv" hidden><button class="bt" onclick="exportar(FR,'movimientos')">↓ CSV</button></div></div>
+  <div class="fl"><select id="ft" onchange="movs()"><option value="">Todos los tipos</option><option value="Ingreso">Ventas</option><option value="Gasto">Gastos</option></select><select id="fc" onchange="movs()"><option value="">Todas las categorías</option></select></div>
+  <div class="sc"><table><thead><tr><th onclick="ordenar('d')">Fecha</th><th onclick="ordenar('c')">Concepto</th><th onclick="ordenar('k')">Categoría</th><th class="n" onclick="ordenar('m')">Monto</th><th></th></tr></thead><tbody id="tb"></tbody></table></div>
   <div class="lb" id="ft2" style="margin-top:14px"></div>
  </div>
 </section>
@@ -179,10 +183,10 @@ details{margin:6px 0}summary{cursor:pointer;font-size:10px;letter-spacing:2px;te
   <div class="fl">
    <input id="dn" placeholder="Nombre (ej. Alquiler)" maxlength="40" style="flex:1;min-width:150px">
    <input id="dm" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Monto S/" style="width:110px">
-   <select id="dt"><option value="mensual">Mensual</option><option value="unico">Pago único</option></select>
+   <select id="dt" onchange="tipoDeuda()"><option value="mensual">Mensual</option><option value="unico">Pago único</option></select>
    <input id="dd" type="number" min="1" max="31" placeholder="Día del mes" style="width:120px">
    <input id="df" type="date" hidden>
-   <button class="bt pr" id="btnAddD">+ Agregar</button>
+   <button class="bt pr" onclick="addDeuda()">+ Agregar</button>
   </div>
   <div id="dbar" style="margin:6px 0 4px"></div>
   <div class="sc"><table><thead><tr><th>Deuda</th><th>Vence</th><th class="n">Monto</th><th>Estado</th><th></th></tr></thead><tbody id="dtb"></tbody></table></div>
@@ -197,7 +201,7 @@ details{margin:6px 0}summary{cursor:pointer;font-size:10px;letter-spacing:2px;te
    <div class="fm">
     <label class="lb">Nombre del negocio</label><input id="cfgN" maxlength="40" placeholder="Ej. Bodega Don Luis">
     <label class="lb">Régimen tributario</label>
-    <select id="cfgR"><option value="NRUS">Nuevo RUS (NRUS)</option><option value="RER">Régimen Especial (RER)</option><option value="RMT">MYPE Tributario (RMT)</option><option value="NONE">No calcular impuestos</option></select>
+    <select id="cfgR" onchange="regUI()"><option value="NRUS">Nuevo RUS (NRUS)</option><option value="RER">Régimen Especial (RER)</option><option value="RMT">MYPE Tributario (RMT)</option><option value="NONE">No calcular impuestos</option></select>
     <label class="lb">Último dígito de tu RUC</label>
     <select id="cfgD"><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option></select>
     <label class="lb">Valor de la UIT (S/)</label><input id="cfgU" type="number" min="0" step="50" inputmode="decimal">
@@ -212,12 +216,12 @@ details{margin:6px 0}summary{cursor:pointer;font-size:10px;letter-spacing:2px;te
     <label class="lb">Meta de margen de ganancia (%)</label><input id="cfgG" type="number" min="0" max="100" step="1" inputmode="numeric">
     <label class="lb">Meta de ventas mensual (S/)</label><input id="cfgM" type="number" min="0" step="10" inputmode="decimal" placeholder="0 = sin meta">
     <label class="lb">URL del formulario de registro</label><input id="cfgF" type="url" placeholder="https://script.google.com/macros/s/…/exec">
-    <div class="hr"><button class="bt pr" id="btnSaveCfg">Guardar</button><button class="bt" id="btnResCfg">Restablecer</button></div>
+    <div class="hr"><button class="bt pr" onclick="guardar()">Guardar</button><button class="bt" onclick="resetCfg()">Restablecer</button></div>
    </div></div>
  </div>
 <div class="pn" style="margin-top:14px"><div class="lb">Beneficios tributarios (Amazonía)</div>
   <div class="fm">
-   <label class="lb" style="display:flex;gap:10px;align-items:center;cursor:pointer"><input type="checkbox" id="cfgA" style="width:auto;margin:0"> Aplicar Ley 27037 (Amazonía)</label>
+   <label class="lb" style="display:flex;gap:10px;align-items:center;cursor:pointer"><input type="checkbox" id="cfgA" onchange="togAm()" style="width:auto;margin:0"> Aplicar Ley 27037 (Amazonía)</label>
    <div id="amx" hidden>
     <label class="lb" style="display:flex;gap:10px;align-items:center;cursor:pointer;margin:12px 0"><input type="checkbox" id="cfgAI" style="width:auto;margin:0"> Exoneración del IGV en ventas dentro de la zona</label>
     <label class="lb">Tasa de Renta promocional</label>
@@ -229,8 +233,8 @@ details{margin:6px 0}summary{cursor:pointer;font-size:10px;letter-spacing:2px;te
   <div class="fm">
    <div class="lb" style="line-height:1.8">Correo: <span id="cuenta" style="color:#d4d4d8"></span></div>
    <div class="lb" style="line-height:1.8">Plan: <span id="plan" style="color:#d4d4d8">FREE</span></div>
-   <div class="hr"><button class="bt pr" id="btnPro">Plan Pro · S/ 19.99 al mes</button><button class="bt" id="btnExpDat">↓ Descargar mis datos</button><button class="bt" id="btnOut">Cerrar sesión</button></div>
-   <div class="hr" style="margin-top:14px"><button class="bt" id="btnDelAcc" style="border-color:#ff4d4d;color:#ff4d4d">Eliminar mi cuenta</button></div>
+   <div class="hr"><button class="bt pr" onclick="mejorarPlan()">Plan Pro · S/ 19.99 al mes</button><button class="bt" onclick="exportarDatos()">↓ Descargar mis datos</button><button class="bt" onclick="salir()">Cerrar sesión</button></div>
+   <div class="hr" style="margin-top:14px"><button class="bt" onclick="eliminarCuenta()" style="border-color:#ff4d4d;color:#ff4d4d">Eliminar mi cuenta</button></div>
    <div class="lb" style="line-height:1.8"><a href="terminos.html" target="_blank" rel="noopener" style="color:#10b981">Términos</a> · <a href="privacidad.html" target="_blank" rel="noopener" style="color:#10b981">Privacidad</a> · <a href="cookies.html" target="_blank" rel="noopener" style="color:#10b981">Cookies</a></div>
   </div></div>
 </section>
@@ -247,31 +251,34 @@ details{margin:6px 0}summary{cursor:pointer;font-size:10px;letter-spacing:2px;te
  <div class="hr" style="justify-content:space-between;margin-top:8px"><button class="lk" id="asw" type="button" data-m="signup">¿No tienes cuenta? Crear una</button><button class="lk" id="aforgot" type="button">Olvidé mi contraseña</button></div>
 </div></div>
 <div id="modal" hidden><div class="card" style="max-width:480px">
- <div class="rw"><div class="lb">Nuevo registro</div><button class="bt" id="btnCloseM" aria-label="Cerrar">✕</button></div>
+ <div class="rw"><div class="lb">Nuevo registro</div><button class="bt" onclick="cerrarModal()" aria-label="Cerrar">✕</button></div>
  <div class="sgm" id="mtipo" style="margin:14px 0"><button data-t="Ingreso" class="on">Venta o servicio</button><button data-t="Gasto">Gasto</button></div>
  <div class="fm">
-  <label class="lb" for="mm">Monto total (S/)</label><input id="mm" type="number" step="0.01" min="0" inputmode="decimal">
   <label class="lb" for="mk">Categoría</label><select id="mk"></select>
-  <label class="lb" for="mc" id="mdl">Producto / servicio</label><input id="mc" maxlength="80" autocomplete="off">
-  <div id="mqf"><label class="lb" for="mq">Cantidad</label><input id="mq" type="number" min="1" value="1" inputmode="numeric"></div>
+  <div class="lb" id="itlbl" style="margin-bottom:4px">Productos o servicios vendidos</div>
+  <div id="itl"></div>
+  <button class="bt" type="button" onclick="itemAdd()" style="width:100%;margin:10px 0">+ Agregar línea</button>
+  <div class="rw" style="margin:6px 0 18px"><span class="lb">Total del comprobante</span><b id="mtot" style="font-size:20px;font-weight:400;color:#d4d4d8">S/ 0.00</b></div>
   <label class="lb" for="mf">Fecha</label><input id="mf" type="date">
   <details><summary>Comprobante y detracción (opcional)</summary>
-   <label class="lb" for="mtc">Comprobante</label><select id="mtc"><option value="">Sin comprobante</option><option value="03">03 · Boleta</option><option value="01">01 · Factura</option><option value="02">02 · Recibo por honorarios</option><option value="04">04 · Liquidación de compra</option></select>
-   <label class="lb" for="msn">Serie-Número</label><input id="msn" placeholder="F001-123" maxlength="30" autocomplete="off">
-   <label class="lb" for="mdi">Documento</label><select id="mdi"><option>RUC</option><option>DNI</option></select>
-   <label class="lb" for="mnd">Número</label><input id="mnd" inputmode="numeric" maxlength="11" autocomplete="off">
-   <label class="lb" for="mrs">Razón social</label><input id="mrs" maxlength="120" autocomplete="off">
-   <label class="lb" style="display:flex;gap:10px;align-items:center"><input type="checkbox" id="msd" style="width:auto;margin:0"> Sujeto a detracción</label>
-   <label class="lb" for="mtd">Tasa de detracción (%)</label><input id="mtd" type="number" value="12" min="0" max="100" step="0.5" inputmode="decimal">
+   <div class="fm">
+    <label class="lb" for="mtc">Comprobante</label><select id="mtc"><option value="">Sin comprobante</option><option value="03">03 · Boleta</option><option value="01">01 · Factura</option><option value="02">02 · Recibo por honorarios</option><option value="04">04 · Liquidación de compra</option></select>
+    <label class="lb" for="msn">Serie-Número</label><input id="msn" placeholder="F001-123" maxlength="30" autocomplete="off">
+    <label class="lb" for="mdi">Documento</label><select id="mdi"><option>RUC</option><option>DNI</option></select>
+    <label class="lb" for="mnd">Número</label><input id="mnd" inputmode="numeric" maxlength="11" autocomplete="off">
+    <label class="lb" for="mrs">Razón social</label><input id="mrs" maxlength="120" autocomplete="off">
+    <label class="lb" style="display:flex;gap:10px;align-items:center"><input type="checkbox" id="msd" style="width:auto;margin:0"> Sujeto a detracción</label>
+    <label class="lb" for="mtd">Tasa de detracción (%)</label><input id="mtd" type="number" value="12" min="0" max="100" step="0.5" inputmode="decimal">
+   </div>
   </details>
-  <button class="bt pr" id="mbtn" style="width:100%;padding:14px">Guardar</button>
+  <button class="bt pr" id="mbtn" onclick="guardarMov()" style="width:100%;padding:14px">Guardar</button>
   <div class="err" id="merr" role="alert"></div>
  </div>
 </div></div>
 <div id="toast" role="status"></div>
 
 <script src="config.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
