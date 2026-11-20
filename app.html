@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="favicon.svg">
+<title>SYS.PANEL</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" crossorigin="anonymous"></script>
+<style>
+:root{--bg:#000;--p:#0a0a0a;--l:#1f1f23;--l2:#2e2e33;--t:#fff;--d:#a1a1aa;--m:#52525b;--g:#10b981;--r:#ff4d4d;--y:#ffc14d;--f:'JetBrains Mono',ui-monospace,Menlo,monospace;color-scheme:dark;padding-top:env(safe-area-inset-top,0)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{margin:0;background:var(--bg);overflow-x:hidden}
+body{font:300 13px var(--f);color:var(--d);min-height:100vh;display:flex}
+.side{width:64px;border-right:1px solid var(--l);display:flex;flex-direction:column;align-items:center;padding:22px 0;gap:4px;position:sticky;top:0;height:100vh;flex-shrink:0;background:var(--bg);z-index:20}
+.side b{width:7px;height:7px;background:var(--g);border-radius:50%;margin-bottom:24px;animation:p 2.4s infinite}
+@keyframes p{50%{opacity:.25}}
+.nb{background:none;border:0;color:var(--m);font:400 9px var(--f);letter-spacing:1px;text-transform:uppercase;cursor:pointer;padding:12px 0;width:100%;display:flex;flex-direction:column;align-items:center;gap:6px}
+.nb i{font-style:normal;font-size:17px}.nb:hover{color:var(--d)}.nb.on{color:var(--g)}
+main{flex:1;min-width:0;max-width:1280px;margin:0 auto;padding:24px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:22px}
+.ttl{font-size:18px;color:var(--t);letter-spacing:2px;margin-top:4px}
+.hr{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.lb{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--m)}
+select,input{background:#050505;border:1px solid var(--l2);color:var(--t);font:300 12px var(--f);padding:9px 10px;border-radius:2px;outline:0;max-width:100%}
+select:focus,input:focus{border-color:var(--g)}
+select option{background:#0a0a0a}
+.bt{background:none;border:1px solid var(--l2);color:var(--d);font:400 11px var(--f);letter-spacing:1.5px;text-transform:uppercase;padding:9px 12px;border-radius:2px;cursor:pointer;transition:.2s}
+.bt:hover{border-color:var(--g);color:var(--g)}.bt.pr{border-color:var(--g);color:var(--g)}.bt.pr:hover{background:var(--g);color:#000}
+.rel{position:relative}
+.pop{position:absolute;right:0;top:42px;width:300px;max-width:80vw;background:#050505;border:1px solid var(--l2);border-radius:2px;padding:14px;z-index:30;display:flex;flex-direction:column;gap:10px;font-size:12px}
+.pop[hidden]{display:none}
+.al{padding-left:10px;border-left:2px solid var(--g);line-height:1.5}.al.r{border-color:var(--r)}.al.y{border-color:var(--y)}
+.v{display:none}.v.on{display:block;animation:e .35s ease both}
+@keyframes e{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.g{display:grid;gap:14px;margin-bottom:14px}
+.c2{grid-template-columns:repeat(2,minmax(0,1fr))}.c3{grid-template-columns:repeat(3,minmax(0,1fr))}.c4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.pn{border:1px solid var(--l);background:var(--p);border-radius:4px;padding:18px;min-width:0}
+.big{font:300 28px var(--f);color:var(--t);letter-spacing:-1px;margin:6px 0 4px;word-break:break-word}
+.sub{font-size:11px;min-height:15px}
+.mi div:nth-child(2){font-size:17px;margin-top:6px;color:var(--t)}
+.gy{color:#d4d4d8!important}.g-t{color:var(--g)!important}.r-t{color:var(--r)!important}.y-t{color:var(--y)!important}
+.rw{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.ch{position:relative;height:210px;margin-top:14px}.ch.s{height:170px;margin:0;flex:1}
+.dn{display:flex;align-items:center;gap:16px;margin-top:14px}#leg{flex:1;display:flex;flex-direction:column;gap:9px;font-size:11px}
+.lg{display:flex;justify-content:space-between;gap:8px}.lg i{display:inline-block;width:7px;height:7px;margin-right:8px}.lg b{color:var(--t);font-weight:400}
+.bar{height:2px;background:var(--l);margin-top:7px}.bar i{display:block;height:100%}
+.tr{margin-bottom:15px;font-size:12px}.tx{color:var(--t);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.rx{padding:9px 0;border-bottom:1px solid var(--l);font-size:12px;flex-wrap:nowrap}
+.rx>div{min-width:0;flex:1}
+.vac{color:var(--m);font-size:11px;padding:14px 0;text-align:center}
+.act{width:100%;display:flex;justify-content:space-between;align-items:center;background:none;border:0;border-bottom:1px solid var(--l);color:var(--d);font:300 12px var(--f);padding:15px 0;cursor:pointer;text-align:left}
+.act:hover{color:var(--g)}.act small{display:block;color:var(--m);font-size:10px;margin-top:3px}
+.act b{color:var(--t);font-weight:400}
+.sgm{display:flex;border:1px solid var(--l2);border-radius:2px}.sgm button{background:none;border:0;color:var(--m);font:400 10px var(--f);padding:6px 10px;cursor:pointer}.sgm button.on{color:var(--g);background:rgba(16,185,129,.07)}
+table{width:100%;border-collapse:collapse;font-size:12px}th{font:400 10px var(--f);letter-spacing:1.5px;text-transform:uppercase;color:var(--m);text-align:left;padding:10px 8px;border-bottom:1px solid var(--l2);cursor:pointer;white-space:nowrap}
+td{padding:10px 8px;border-bottom:1px solid var(--l)}td.n,th.n{text-align:right;white-space:nowrap}.sc{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.fl{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
+.fm{display:flex;flex-direction:column;gap:6px;max-width:420px;margin-top:14px}.fm input{margin-bottom:14px;width:100%}
+#toast{position:fixed;left:50%;bottom:90px;transform:translate(-50%,10px);background:#050505;border:1px solid var(--g);color:var(--g);padding:10px 16px;font-size:11px;letter-spacing:1px;opacity:0;pointer-events:none;transition:.3s;z-index:50;text-align:center;max-width:calc(100vw - 24px);width:max-content}#toast.on{opacity:1;transform:translate(-50%,0)}
+#auth,#modal{position:fixed;inset:0;z-index:100;display:flex;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto}
+#auth{background:var(--bg);align-items:center}#modal{background:rgba(0,0,0,.9)}
+#auth[hidden],#modal[hidden]{display:none}
+.card{width:100%;max-width:440px;background:var(--p);border:1px solid var(--l);border-radius:4px;padding:26px;margin:auto}
+.err{font-size:12px;min-height:18px;margin-top:12px;color:var(--r);line-height:1.6}.err.ok{color:var(--g)}
+.lk{background:none;border:0;color:var(--g);font:inherit;font-size:12px;text-decoration:underline;cursor:pointer;padding:0}
+details{margin:6px 0}summary{cursor:pointer;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--m);padding:8px 0}
+.card a,#empty a{color:var(--g)}
+#mtipo{width:100%}
+#mtipo button{flex:1;padding:10px 8px}
+.fm .itm{display:grid;grid-template-columns:76px 1fr auto;gap:8px;padding:10px 0;border-bottom:1px solid var(--l);align-items:center}
+.fm .itm .in{grid-column:1/3}.fm .itm input{margin-bottom:0;min-width:0}
+.fm .itm [data-item-del]{justify-self:end}
+.fm .itm .itt{text-align:right;color:var(--t);font-size:13px;min-width:82px;white-space:nowrap}
+#modal .fm select{margin-bottom:14px}
+@media(max-width:1000px){.c3,.c4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){
+ body{display:block}
+ main{width:100%;max-width:100%;padding:14px 12px calc(88px + env(safe-area-inset-bottom,0))}
+ .side{position:fixed;top:auto;bottom:0;left:0;right:0;width:100%;height:auto;flex-direction:row;justify-content:space-between;border-right:0;border-top:1px solid var(--l);padding:0 4px env(safe-area-inset-bottom,0);background:rgba(0,0,0,.95);backdrop-filter:blur(8px);overflow-x:auto;scrollbar-width:none;gap:0}
+ .side::-webkit-scrollbar{display:none}
+ .side b{display:none}
+ .nb{padding:10px 4px;min-width:60px;flex:1 0 auto;font-size:8.5px;letter-spacing:.3px;gap:4px}
+ .nb i{font-size:16px}
+ header{margin-bottom:16px;gap:10px}
+ .ttl{font-size:16px}
+ .hr{width:100%;gap:6px}
+ #per,#q{flex:1 1 130px;width:auto!important;min-width:0}
+ #btnNew{margin-left:auto}
+ #usr{display:none}
+ select,input{font-size:16px;min-height:40px}
+ .bt{min-height:40px;padding:8px 10px}
+ .pop{position:fixed;left:12px;right:12px;top:auto;bottom:calc(74px + env(safe-area-inset-bottom,0));width:auto;max-width:none;max-height:55vh;overflow-y:auto;box-shadow:0 12px 32px rgba(0,0,0,.85)}
+ .g{gap:10px;margin-bottom:10px}
+ .c2,.c3{grid-template-columns:1fr}
+ .c4{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .pn{padding:14px 12px}
+ .big{font-size:clamp(16px,5vw,21px);letter-spacing:-.5px;word-break:normal;overflow-wrap:anywhere}
+ .mi div:nth-child(2){font-size:15px}
+ .ch{height:190px}
+ .dn{flex-direction:column;align-items:stretch;gap:12px}
+ .ch.s{flex:none;width:100%;height:175px}
+ table{font-size:11.5px}
+ th,td{padding:8px 6px}
+ .fm{max-width:100%}
+ #v-deudas .fl>*{flex:1 1 130px;width:auto!important}
+ #v-deudas #dn,#v-deudas #btnAddD{flex:1 1 100%}
+ #modal,#auth{padding:12px 10px 32px}
+ .card{padding:18px 14px}
+ .fm .itm{grid-template-columns:1fr 1fr 40px;gap:8px}
+ .fm .itm .in{grid-column:1/3}
+ .fm .itm .itt{grid-column:1/4;text-align:right;font-size:12px;padding-top:2px;color:var(--d)}
+}
+@media(max-width:360px){.c4{grid-template-columns:1fr}}
+@media print{.side,.hr,#toast{display:none}body{display:block}.v{display:block!important;break-inside:avoid}}
+</style>
+</head>
+<body>
+<nav class="side" aria-label="Secciones"><b></b>
+<button class="nb on" data-v="resumen"><i>▦</i>Resumen</button>
+<button class="nb" data-v="ventas"><i>◫</i>Ventas</button>
+<button class="nb" data-v="analisis"><i>◔</i>Análisis</button>
+<button class="nb" data-v="impuestos"><i>%</i>Impuestos</button>
+<button class="nb" data-v="deudas"><i>◷</i>Deudas</button>
+<button class="nb" data-v="movs"><i>≡</i>Registros</button>
+<button class="nb" data-v="ajustes"><i>⚙</i>Ajustes</button>
+</nav>
+<main>
+<header>
+ <div><div class="lb" id="st">● …</div><div class="ttl" id="ttl">SYS.PANEL</div></div>
+ <div class="hr">
+  <select id="per" aria-label="Periodo"><option value="all">Todo el periodo</option></select>
+  <input id="q" type="search" placeholder="buscar movimiento…" aria-label="Buscar" style="width:170px">
+  <span class="rel"><button class="bt" id="btnAl" aria-label="Alertas">◉ <span id="nbad">0</span></button><div id="al" class="pop" hidden></div></span>
+  <button class="bt" id="btnRef" aria-label="Actualizar">⟳</button>
+  <button class="bt pr" id="btnNew">+ Nuevo</button>
+  <span class="lb" id="usr" style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+ </div>
+</header>
+
+<section id="v-resumen" class="v on">
+ <div class="pn" id="empty" hidden style="margin-bottom:14px"><div class="lb">Empieza aquí</div><div style="margin:10px 0 14px;line-height:1.8">Aún no tienes registros. Toca <b>+ Nuevo</b> para anotar tu primera venta o gasto, o importa tu historial desde un archivo CSV en la sección Registros.</div><div class="hr"><button class="bt pr" id="btnEmpNew">+ Nuevo registro</button><button class="bt" id="btnDemo">Ver con datos de ejemplo</button></div></div>
+ <div class="g c4" id="hoy"></div>
+ <div class="g c4" id="kp"></div>
+ <div class="g c2">
+  <div class="pn"><div class="rw"><div class="lb">Evolución diaria · <span class="r-t">gastos</span> / <span class="g-t">ingresos</span></div>
+   <div class="sgm" id="rng"><button data-n="14" class="on">14D</button><button data-n="30">30D</button><button data-n="0">Todo</button></div></div>
+   <div class="ch"><canvas id="cEvo"></canvas></div></div>
+  <div class="pn"><div class="lb">Distribución de gastos</div><div class="dn"><div class="ch s"><canvas id="cDon"></canvas></div><div id="leg"></div></div></div>
+ </div>
+ <div class="g c4" id="mini"></div>
+ <div class="g c2">
+  <div class="pn"><div class="lb">Próximos pagos y vencimientos</div><div style="margin-top:8px" id="prox"></div></div>
+  <div class="pn"><div class="lb">Productos y servicios más vendidos</div><div style="margin-top:16px" id="topP"></div></div>
+ </div>
+ <div class="g c3">
+  <div class="pn"><div class="lb">Top gastos</div><div style="margin-top:16px" id="top"></div></div>
+  <div class="pn"><div class="lb">Transacciones recientes</div><div style="margin-top:8px" id="rec"></div></div>
+  <div class="pn"><div class="lb">Acciones rápidas</div><div style="margin-top:6px">
+   <button class="act" id="actNew"><span>Nuevo registro<small>Abrir el formulario</small></span><b>→</b></button>
+   <button class="act" id="actCsv"><span>Exportar CSV<small>Periodo seleccionado</small></span><b>↓</b></button>
+   <button class="act" id="actRef"><span>Actualizar datos<small>Volver a leer la hoja</small></span><b>⟳</b></button>
+   <button class="act" id="actPrt"><span>Imprimir reporte<small>Guardar como PDF</small></span><b>⎙</b></button></div></div>
+ </div>
+</section>
+
+<section id="v-ventas" class="v">
+ <div class="g c4" id="vk"></div>
+ <div class="g c2">
+  <div class="pn"><div class="rw"><div class="lb">Ventas, gastos y ganancia por día</div>
+   <div class="sgm" id="rng2"><button data-n="14" class="on">14D</button><button data-n="30">30D</button><button data-n="0">Todo</button></div></div>
+   <div class="ch"><canvas id="cDia"></canvas></div></div>
+  <div class="pn"><div class="lb">Ventas por tipo</div><div class="ch"><canvas id="cTip"></canvas></div></div>
+ </div>
+ <div class="g c2">
+  <div class="pn"><div class="rw"><div class="lb">Más vendidos</div>
+   <div class="sgm" id="rng3"><button data-m="v" class="on">S/</button><button data-m="q">Unid.</button></div></div>
+   <div class="ch" style="height:260px"><canvas id="cPro"></canvas></div><div class="lb" id="par" style="margin-top:12px;line-height:1.7"></div></div>
+  <div class="pn"><div class="lb">Detalle por producto o servicio</div>
+   <div class="sc" style="max-height:340px;margin-top:8px"><table><thead><tr><th>Producto</th><th class="n">Unid.</th><th class="n">Ventas</th><th class="n">%</th></tr></thead><tbody id="tpr"></tbody></table></div></div>
+ </div>
+ <div class="pn"><div class="lb">Resultado por día</div>
+  <div class="sc" style="margin-top:8px"><table><thead><tr><th>Día</th><th class="n">Ventas</th><th class="n">Gastos</th><th class="n">Ganancia</th><th class="n">Margen</th><th class="n">N.º ventas</th></tr></thead><tbody id="tdi"></tbody></table></div></div>
+</section>
+
+<section id="v-impuestos" class="v">
+ <div class="g c4" id="ik"></div>
+ <div class="g c2">
+  <div class="pn"><div class="lb" id="itl">Impuestos</div><div id="ibr" style="margin-top:8px"></div></div>
+  <div class="pn"><div class="lb">Fechas de pago SUNAT</div><div id="ive" style="margin-top:8px"></div></div>
+ </div>
+ <div class="pn"><div class="lb">Tope anual de tu régimen</div><div id="itp" style="margin-top:12px"></div>
+  <div class="lb" id="inote" style="margin-top:16px;line-height:1.8"></div></div>
+</section>
+
+<section id="v-analisis" class="v">
+ <div class="g c2">
+  <div class="pn"><div class="lb">Ventas vs gastos por mes</div><div class="ch"><canvas id="cMes"></canvas></div></div>
+  <div class="pn"><div class="lb">Balance acumulado del periodo</div><div class="ch"><canvas id="cFlu"></canvas></div></div>
+ </div>
+ <div class="g c3">
+  <div class="pn"><div class="lb">Gasto por día de la semana</div><div class="ch"><canvas id="cSem"></canvas></div></div>
+  <div class="pn"><div class="lb" id="tCmp">Categorías</div><div class="ch"><canvas id="cCmp"></canvas></div></div>
+  <div class="pn"><div class="lb">Ventas por categoría</div><div class="ch"><canvas id="cIng"></canvas></div></div>
+ </div>
+ <div class="pn"><div class="lb">Mayores gastos del periodo</div><div id="big" style="margin-top:8px"></div></div>
+</section>
+
+<section id="v-movs" class="v">
+ <div class="pn">
+  <div class="rw"><div class="lb">Movimientos del periodo</div><div class="hr"><button class="bt" id="btnTpl">Plantilla</button><button class="bt" id="btnImp">↑ Importar</button><input type="file" id="csvf" accept=".csv,text/csv" hidden><button class="bt" id="btnExp">↓ CSV</button></div></div>
+  <div class="fl"><select id="ft"><option value="">Todos los tipos</option><option value="Ingreso">Ventas</option><option value="Gasto">Gastos</option></select><select id="fc"><option value="">Todas las categorías</option></select></div>
+  <div class="sc"><table><thead><tr><th data-ord="d">Fecha</th><th data-ord="c">Concepto</th><th data-ord="k">Categoría</th><th class="n" data-ord="m">Monto</th><th></th></tr></thead><tbody id="tb"></tbody></table></div>
+  <div class="lb" id="ft2" style="margin-top:14px"></div>
+ </div>
+</section>
+
+<section id="v-deudas" class="v">
+ <div class="g c4" id="dk"></div>
+ <div class="pn">
+  <div class="lb" id="dtl">Deudas y pagos futuros</div>
+  <div class="fl">
+   <input id="dn" placeholder="Nombre (ej. Alquiler)" maxlength="40" style="flex:1;min-width:150px">
+   <input id="dm" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Monto S/" style="width:110px">
+   <select id="dt"><option value="mensual">Mensual</option><option value="unico">Pago único</option></select>
+   <input id="dd" type="number" min="1" max="31" placeholder="Día del mes" style="width:120px">
+   <input id="df" type="date" hidden>
+   <button class="bt pr" id="btnAddD">+ Agregar</button>
+  </div>
+  <div id="dbar" style="margin:6px 0 4px"></div>
+  <div class="sc"><table><thead><tr><th>Deuda</th><th>Vence</th><th class="n">Monto</th><th>Estado</th><th></th></tr></thead><tbody id="dtb"></tbody></table></div>
+  <div class="lb" style="margin-top:14px;line-height:1.7">Se marca como pagada sola cuando existe un gasto con nombre igual o parecido cerca de su fecha de pago.</div>
+ </div>
+ <div class="pn" id="dfu" style="margin-top:14px" hidden><div class="lb">Pagos de otros meses</div><div id="dfl" style="margin-top:8px"></div></div>
+</section>
+
+<section id="v-ajustes" class="v">
+ <div class="g c2">
+  <div class="pn"><div class="lb">Tu negocio</div>
+   <div class="fm">
+    <label class="lb">Nombre del negocio</label><input id="cfgN" maxlength="40" placeholder="Ej. Bodega Don Luis">
+    <label class="lb">Régimen tributario</label>
+    <select id="cfgR"><option value="NRUS">Nuevo RUS (NRUS)</option><option value="RER">Régimen Especial (RER)</option><option value="RMT">MYPE Tributario (RMT)</option><option value="NONE">No calcular impuestos</option></select>
+    <label class="lb">Último dígito de tu RUC</label>
+    <select id="cfgD"><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option></select>
+    <label class="lb">Valor de la UIT (S/)</label><input id="cfgU" type="number" min="0" step="50" inputmode="decimal">
+    <label class="lb">Ventas sin comprobante detallado: ¿el precio incluye IGV?</label>
+    <select id="cfgI"><option value="1">Sí, ya incluyen IGV</option><option value="0">No, el IGV se suma aparte</option></select>
+    <div id="fila-coef"><label class="lb">Coeficiente del pago a cuenta del IR (RMT)</label><input id="cfgC" type="number" min="0" max="0.2" step="0.0001" inputmode="decimal" placeholder="Ej. 0.0154 · 0 = sin coeficiente">
+     <div class="lb" style="line-height:1.7;margin:-4px 0 14px">Se usa solo cuando superas 300 UIT en el año (se toma el mayor entre tu coeficiente y 1.5%). Hasta 300 UIT el pago a cuenta es 1%.</div></div>
+   </div></div>
+  <div class="pn"><div class="lb">Metas y conexión</div>
+   <div class="fm">
+    <label class="lb">Presupuesto mensual de gastos (S/)</label><input id="cfgB" type="number" min="0" step="1" inputmode="decimal" placeholder="0 = sin presupuesto">
+    <label class="lb">Meta de margen de ganancia (%)</label><input id="cfgG" type="number" min="0" max="100" step="1" inputmode="numeric">
+    <label class="lb">Meta de ventas mensual (S/)</label><input id="cfgM" type="number" min="0" step="10" inputmode="decimal" placeholder="0 = sin meta">
+    <label class="lb">URL del formulario de registro</label><input id="cfgF" type="url" placeholder="https://script.google.com/macros/s/…/exec">
+    <div class="hr"><button class="bt pr" id="btnSaveCfg">Guardar</button><button class="bt" id="btnResCfg">Restablecer</button></div>
+   </div></div>
+ </div>
+<div class="pn" style="margin-top:14px"><div class="lb">Beneficios tributarios (Amazonía)</div>
+  <div class="fm">
+   <label class="lb" style="display:flex;gap:10px;align-items:center;cursor:pointer"><input type="checkbox" id="cfgA" style="width:auto;margin:0"> Aplicar Ley 27037 (Amazonía)</label>
+   <div id="amx" hidden>
+    <label class="lb" style="display:flex;gap:10px;align-items:center;cursor:pointer;margin:12px 0"><input type="checkbox" id="cfgAI" style="width:auto;margin:0"> Exoneración del IGV en ventas dentro de la zona</label>
+    <label class="lb">Tasa de Renta promocional</label>
+    <select id="cfgAR"><option value="0">0%</option><option value="5">5%</option><option value="10">10%</option></select>
+   </div>
+   <div class="lb" style="line-height:1.8;margin-top:8px">Aplica a empresas ubicadas en la Amazonía (en Huánuco: Leoncio Prado, Puerto Inca, Marañón y Pachitea, entre otras) según su actividad. La tasa promocional reemplaza la escala 10% / 29.5% en la proyección anual del RMT. Confírmalo con tu contador antes de usarlo.</div>
+  </div></div>
+<div class="pn" style="margin-top:14px"><div class="lb">Cuenta y plan</div>
+  <div class="fm">
+   <div class="lb" style="line-height:1.8">Correo: <span id="cuenta" style="color:#d4d4d8"></span></div>
+   <div class="lb" style="line-height:1.8">Plan: <span id="plan" style="color:#d4d4d8">FREE</span></div>
+   <div class="hr"><button class="bt pr" id="btnPro">Plan Pro · S/ 19.99 al mes</button><button class="bt" id="btnExpDat">↓ Descargar mis datos</button><button class="bt" id="btnOut">Cerrar sesión</button></div>
+   <div class="hr" style="margin-top:14px"><button class="bt" id="btnDelAcc" style="border-color:#ff4d4d;color:#ff4d4d">Eliminar mi cuenta</button></div>
+   <div class="lb" style="line-height:1.8"><a href="terminos.html" target="_blank" rel="noopener" style="color:#10b981">Términos</a> · <a href="privacidad.html" target="_blank" rel="noopener" style="color:#10b981">Privacidad</a> · <a href="cookies.html" target="_blank" rel="noopener" style="color:#10b981">Cookies</a></div>
+  </div></div>
+</section>
+</main>
+<div id="auth" hidden><div class="card">
+ <div class="ttl" style="margin-bottom:6px">INTI FINANZAS</div><div class="lb" id="asub" style="margin-bottom:22px">Ingresa a tu cuenta</div>
+ <form id="fa" class="fm" novalidate>
+  <div id="arow-e"><label class="lb" for="ae">Correo</label><input id="ae" type="email" autocomplete="email" maxlength="120" inputmode="email"></div>
+  <div id="arow-p"><label class="lb" for="ap">Contraseña (mínimo 8 caracteres)</label><input id="ap" type="password" autocomplete="current-password" maxlength="72"></div>
+  <label class="lb" id="aterm-l" hidden style="display:flex;gap:10px;align-items:flex-start;line-height:1.7"><input type="checkbox" id="aterms" style="width:auto;margin:3px 0 0"><span>Acepto los <a href="terminos.html" target="_blank" rel="noopener">términos</a> y la <a href="privacidad.html" target="_blank" rel="noopener">política de privacidad</a></span></label>
+  <button class="bt pr" id="abtn" type="submit" style="width:100%;padding:14px;margin-top:4px">Entrar</button>
+ </form>
+ <div class="err" id="aerr" role="alert"></div>
+ <div class="hr" style="justify-content:space-between;margin-top:8px"><button class="lk" id="asw" type="button" data-m="signup">¿No tienes cuenta? Crear una</button><button class="lk" id="aforgot" type="button">Olvidé mi contraseña</button></div>
+</div></div>
+<div id="modal" hidden><div class="card" style="max-width:480px">
+ <div class="rw"><div class="lb">Nuevo registro</div><button class="bt" id="btnCloseM" aria-label="Cerrar">✕</button></div>
+ <div class="sgm" id="mtipo" style="margin:14px 0"><button data-t="Ingreso" class="on">Venta o servicio</button><button data-t="Gasto">Gasto</button></div>
+ <div class="fm">
+  <label class="lb" for="mk">Categoría</label><select id="mk"></select>
+  <div class="lb" id="itlbl" style="margin-bottom:4px">Productos o servicios vendidos</div>
+  <div id="mitems"></div>
+  <button class="bt" type="button" id="btnItemAdd" style="width:100%;margin:10px 0">+ Agregar línea</button>
+  <div class="rw" style="margin:6px 0 18px"><span class="lb">Total del comprobante</span><b id="mtot" style="font-size:20px;font-weight:400;color:#d4d4d8">S/ 0.00</b></div>
+  <label class="lb" for="mf">Fecha</label><input id="mf" type="date">
+  <details><summary>Comprobante y detracción (opcional)</summary>
+   <div class="fm">
+    <label class="lb" for="mtc">Comprobante</label><select id="mtc"><option value="">Sin comprobante</option><option value="03">03 · Boleta</option><option value="01">01 · Factura</option><option value="02">02 · Recibo por honorarios</option><option value="04">04 · Liquidación de compra</option></select>
+    <label class="lb" for="msn">Serie-Número</label><input id="msn" placeholder="F001-123" maxlength="30" autocomplete="off">
+    <label class="lb" for="mdi">Documento</label><select id="mdi"><option>RUC</option><option>DNI</option></select>
+    <label class="lb" for="mnd">Número</label><input id="mnd" inputmode="numeric" maxlength="11" autocomplete="off">
+    <label class="lb" for="mrs">Razón social</label><input id="mrs" maxlength="120" autocomplete="off">
+    <label class="lb" style="display:flex;gap:10px;align-items:center"><input type="checkbox" id="msd" style="width:auto;margin:0"> Sujeto a detracción</label>
+    <label class="lb" for="mtd">Tasa de detracción (%)</label><input id="mtd" type="number" value="12" min="0" max="100" step="0.5" inputmode="decimal">
+   </div>
+  </details>
+  <button class="bt pr" id="mbtn" style="width:100%;padding:14px">Guardar</button>
+  <div class="err" id="merr" role="alert"></div>
+ </div>
+</div></div>
+<div id="toast" role="status"></div>
+
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js" crossorigin="anonymous"></script>
+<script src="app.js"></script>
+</body>
+</html>
